@@ -1,4 +1,4 @@
-const parsePattern = (pattern) => {
+const parsePattern = (pattern, separator) => {
   const parsePatternField = (field) => {
     let parsed = {
       key: field,
@@ -15,7 +15,7 @@ const parsePattern = (pattern) => {
   }
 
   return pattern
-          .split(':')
+          .split(separator)
           .map(parsePatternField)
 }
 
@@ -32,12 +32,17 @@ const validate = (parsedPatternFields) => {
 }
 
 export default class SmartIdService {
-  // config => to specify separator
-  // karma tests
-  // standard?
+  constructor ($injector) {
+    try {
+      this.separator = $injector.get('ngSmartIdSeparator')
+    } catch (e) {
+      this.separator = ':'
+    }
+  }
+
   parse (id, pattern) {
-    const idFields = id.split(':')
-    const patternFields = parsePattern(pattern)
+    const idFields = id.split(this.separator)
+    const patternFields = parsePattern(pattern, this.separator)
     validate(patternFields)
 
     let result = idFields.reduce((parsed, value) => {
@@ -57,7 +62,7 @@ export default class SmartIdService {
   }
 
   idify (object, pattern) {
-    const patternFields = parsePattern(pattern)
+    const patternFields = parsePattern(pattern, this.separator)
     validate(patternFields)
 
     const nbGivenFields = Object.keys(object).length
@@ -73,7 +78,7 @@ export default class SmartIdService {
 
     return patternFields.splice(0, nbGivenFields).reduce((id, field) => {
       const value = object[field.key]
-      return id + (id.length ? ':' + value : value)
+      return id + (id.length ? this.separator + value : value)
     }, '')
   }
 }

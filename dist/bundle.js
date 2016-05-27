@@ -30909,7 +30909,7 @@
 
   var angular$1 = (index && typeof index === 'object' && 'default' in index ? index['default'] : index);
 
-  var parsePattern = function parsePattern(pattern) {
+  var parsePattern = function parsePattern(pattern, separator) {
     var parsePatternField = function parsePatternField(field) {
       var parsed = {
         key: field,
@@ -30925,7 +30925,7 @@
       return parsed;
     };
 
-    return pattern.split(':').map(parsePatternField);
+    return pattern.split(separator).map(parsePatternField);
   };
 
   var validate = function validate(parsedPatternFields) {
@@ -30941,19 +30941,21 @@
   };
 
   var SmartIdService = function () {
-    function SmartIdService() {
+    function SmartIdService($injector) {
       babelHelpers.classCallCheck(this, SmartIdService);
+
+      try {
+        this.separator = $injector.get('ngSmartIdSeparator');
+      } catch (e) {
+        this.separator = ':';
+      }
     }
 
     babelHelpers.createClass(SmartIdService, [{
       key: 'parse',
-
-      // config => to specify separator
-      // karma tests
-      // standard?
       value: function parse(id, pattern) {
-        var idFields = id.split(':');
-        var patternFields = parsePattern(pattern);
+        var idFields = id.split(this.separator);
+        var patternFields = parsePattern(pattern, this.separator);
         validate(patternFields);
 
         var result = idFields.reduce(function (parsed, value) {
@@ -30974,7 +30976,9 @@
     }, {
       key: 'idify',
       value: function idify(object, pattern) {
-        var patternFields = parsePattern(pattern);
+        var _this = this;
+
+        var patternFields = parsePattern(pattern, this.separator);
         validate(patternFields);
 
         var nbGivenFields = Object.keys(object).length;
@@ -30990,7 +30994,7 @@
 
         return patternFields.splice(0, nbGivenFields).reduce(function (id, field) {
           var value = object[field.key];
-          return id + (id.length ? ':' + value : value);
+          return id + (id.length ? _this.separator + value : value);
         }, '');
       }
     }]);
