@@ -89,4 +89,38 @@ describe('smartId', function () {
       expect(smartId.idify(obj, pattern)).toBe(id)
     })
   })
+  describe('configuring an array of patterns', function () {
+    beforeEach(function () {
+      testMod = angular.module('testMod', ['ngSmartId']).value('ngSmartIdPatterns', { first: 'country:city:year' })
+    })
+
+    beforeEach(module('testMod'))
+
+    beforeEach(inject(function (_smartId_) {
+      smartId = _smartId_
+    }))
+
+    it('can use a pre-configured pattern for parsing', function () {
+      var id = 'usa:nyc:2016'
+      var obj = { country: 'usa', city: 'nyc', year: '2016' }
+      expect(smartId.parse(id, 'first')).toEqual(obj)
+    })
+    it('can still use a pattern provided as argument to the parse function', function () {
+      var id = 'usa:nyc:2016'
+      var pattern = 'country:city:year'
+      var obj = { country: 'usa', city: 'nyc', year: '2016' }
+      expect(smartId.parse(id, pattern)).toEqual(obj)
+    })
+    it('can use a pre-configured pattern for constructing the id', function () {
+      var obj = { country: 'usa', city: 'nyc', year: '2016' }
+      var id = 'usa:nyc:2016'
+      expect(smartId.idify(obj, 'first')).toBe(id)
+    })
+    it('can still use a pattern provided as argument to the idify function', function () {
+      var pattern = 'country:city:year'
+      var obj = { country: 'usa', city: 'nyc', year: '2016' }
+      var id = 'usa:nyc:2016'
+      expect(smartId.idify(obj, pattern)).toBe(id)
+    })
+  })
 })

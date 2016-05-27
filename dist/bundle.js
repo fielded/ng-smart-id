@@ -30949,11 +30949,18 @@
       } catch (e) {
         this.separator = ':';
       }
+
+      try {
+        this.patterns = $injector.get('ngSmartIdPatterns');
+      } catch (e) {
+        this.patterns = {};
+      }
     }
 
     babelHelpers.createClass(SmartIdService, [{
       key: 'parse',
       value: function parse(id, pattern) {
+        pattern = this.patterns[pattern] || pattern;
         var idFields = id.split(this.separator);
         var patternFields = parsePattern(pattern, this.separator);
         validate(patternFields);
@@ -30978,6 +30985,7 @@
       value: function idify(object, pattern) {
         var _this = this;
 
+        pattern = this.patterns[pattern] || pattern;
         var patternFields = parsePattern(pattern, this.separator);
         validate(patternFields);
 

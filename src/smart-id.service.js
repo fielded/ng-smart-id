@@ -38,9 +38,16 @@ export default class SmartIdService {
     } catch (e) {
       this.separator = ':'
     }
+
+    try {
+      this.patterns = $injector.get('ngSmartIdPatterns')
+    } catch (e) {
+      this.patterns = {}
+    }
   }
 
   parse (id, pattern) {
+    pattern = this.patterns[pattern] || pattern
     const idFields = id.split(this.separator)
     const patternFields = parsePattern(pattern, this.separator)
     validate(patternFields)
@@ -62,6 +69,7 @@ export default class SmartIdService {
   }
 
   idify (object, pattern) {
+    pattern = this.patterns[pattern] || pattern
     const patternFields = parsePattern(pattern, this.separator)
     validate(patternFields)
 
