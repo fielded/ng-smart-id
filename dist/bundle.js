@@ -30985,6 +30985,16 @@
       value: function idify(object, pattern) {
         var _this = this;
 
+        var isValid = function isValid(value) {
+          return typeof value !== 'undefined' && value !== null && value !== '';
+        };
+
+        Object.keys(object).forEach(function (key) {
+          if (!isValid(object[key])) {
+            delete object[key];
+          }
+        });
+
         pattern = this.patterns[pattern] || pattern;
         var patternFields = parsePattern(pattern, this.separator);
         validate(patternFields);

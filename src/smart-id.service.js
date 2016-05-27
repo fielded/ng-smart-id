@@ -69,6 +69,16 @@ export default class SmartIdService {
   }
 
   idify (object, pattern) {
+    const isValid = (value) => {
+      return typeof value !== 'undefined' && value !== null && value !== ''
+    }
+
+    Object.keys(object).forEach((key) => {
+      if (!isValid(object[key])) {
+        delete object[key]
+      }
+    })
+
     pattern = this.patterns[pattern] || pattern
     const patternFields = parsePattern(pattern, this.separator)
     validate(patternFields)

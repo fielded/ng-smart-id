@@ -44,6 +44,17 @@ describe('smartId', function () {
         var id = 'usa:nyc:2016'
         expect(smartId.idify(obj, pattern)).toBe(id)
       })
+      it('discards fields containing `undefined`, `null` or `""`', function () {
+        var pattern = 'country:city:?year'
+        var obj = { country: 'usa', city: 'nyc' }
+        var id = 'usa:nyc'
+        obj.year = undefined
+        expect(smartId.idify(obj, pattern)).toBe(id)
+        obj.year = null
+        expect(smartId.idify(obj, pattern)).toBe(id)
+        obj.year = ''
+        expect(smartId.idify(obj, pattern)).toBe(id)
+      })
       it('accepts optional fields in the pattern', function () {
         var pattern = 'country:city:year:?month'
         var partialId = 'usa:nyc:2016'

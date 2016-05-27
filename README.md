@@ -32,6 +32,14 @@ smartId.idify({ author: 'asimov', series: 'foundation', bookNr: 1 }, 'author:ser
 
 will return `asimov:foundation:1`
 
+Fields containing `undefined`, `null` or `''` will be ignored. Example:
+
+```js
+smartId.idify({ author: 'asimov', series: 'foundation', bookNr: undefined }, 'author:series:?bookNr')
+```
+
+will return `asimov:foundation`
+
 ### Config
 
 It is possible to configure the separator for id fields, if no separator is provided `:` is used by default.
