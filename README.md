@@ -1,5 +1,7 @@
 # ng-smart-id
 
+[![Build Status](https://travis-ci.org/fielded/ng-smart-id.svg)](https://travis-ci.org/fielded/ng-smart-id) ![Dependecy Status](https://david-dm.org/fielded/ng-smart-id.svg) ![Dev Dependecy Status](https://david-dm.org/fielded/ng-smart-id/dev-status.svg)
+
 ## Motivation
 
 This library was created for making it easier to take advantage of smart ids when using PouchDB/CouchDB as a database.
