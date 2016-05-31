@@ -50,18 +50,6 @@
     return pattern.split(separator).map(parsePatternField);
   };
 
-  var validate = function validate(parsedPatternFields) {
-    var wasOptional = false;
-
-    parsedPatternFields.forEach(function (field, index) {
-      if (field.isOptional) {
-        wasOptional = true;
-      } else if (wasOptional) {
-        throw new Error('invalid pattern: ' + parsedPatternFields[index - 1].key + ' is optional, but is followed by non optional field ' + field.key);
-      }
-    });
-  };
-
   var SmartIdService = function () {
     function SmartIdService($injector) {
       babelHelpers.classCallCheck(this, SmartIdService);
@@ -82,22 +70,28 @@
     babelHelpers.createClass(SmartIdService, [{
       key: 'parse',
       value: function parse(id, pattern) {
-        pattern = this.patterns[pattern] || pattern;
         var idFields = id.split(this.separator);
-        var patternFields = parsePattern(pattern, this.separator);
-        validate(patternFields);
 
-        var result = idFields.reduce(function (parsed, value) {
-          var key = patternFields.shift().key;
-          parsed[key] = value;
+        var key = void 0;
+        var result = idFields.reduce(function (parsed, field) {
+          if (!key) {
+            key = field;
+          } else {
+            parsed[key] = field;
+            key = undefined;
+          }
           return parsed;
         }, {});
 
-        if (patternFields.length) {
-          var next = patternFields[0];
-          if (!next.isOptional) {
-            throw new Error('could not parse the id, non optional field ' + next.key + ' missing');
-          }
+        if (pattern) {
+          pattern = this.patterns[pattern] || pattern;
+          var patternFields = parsePattern(pattern, this.separator);
+
+          patternFields.forEach(function (field) {
+            if (!result[field.key] && !field.isOptional) {
+              throw new Error('could not parse the id, non optional field ' + field.key + ' missing');
+            }
+          });
         }
 
         return result;
@@ -111,30 +105,19 @@
           return typeof value !== 'undefined' && value !== null && value !== '';
         };
 
-        Object.keys(object).forEach(function (key) {
-          if (!isValid(object[key])) {
-            delete object[key];
-          }
-        });
-
         pattern = this.patterns[pattern] || pattern;
         var patternFields = parsePattern(pattern, this.separator);
-        validate(patternFields);
 
-        var nbGivenFields = Object.keys(object).length;
-        var nbMissingFields = patternFields.length - nbGivenFields;
-        if (nbMissingFields > 0) {
-          var optionalFields = patternFields.splice(nbGivenFields);
-          optionalFields.forEach(function (field) {
+        return patternFields.reduce(function (id, field) {
+          var value = object[field.key];
+          if (value && isValid(value)) {
+            return id + (id.length ? _this.separator + field.key : field.key) + _this.separator + value;
+          } else {
             if (!field.isOptional) {
               throw new Error('could not generate id, missing field ' + field.key);
             }
-          });
-        }
-
-        return patternFields.splice(0, nbGivenFields).reduce(function (id, field) {
-          var value = object[field.key];
-          return id + (id.length ? _this.separator + value : value);
+            return id;
+          }
         }, '');
       }
     }]);

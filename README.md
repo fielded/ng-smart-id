@@ -6,9 +6,9 @@
 
 This library was created for making it easier to take advantage of smart ids when using PouchDB/CouchDB as a database.
 
-PouchDB/CouchDB implement map/reduce, but that requires views that can take a while to build up, and to refresh when documents change.
+In PouchDB/CouchDB it is best practice to use meaningful ids. Meaningful ids allow querying data in a more efficient way [without the need of constructing views](https://pouchdb.com/2014/05/01/secondary-indexes-have-landed-in-pouchdb.html), that can be slow to build up and to dinamically refresh.
 
-[Using doc ids](https://pouchdb.com/2014/05/01/secondary-indexes-have-landed-in-pouchdb.html) in a smart way, you can avoid views altogether in a lot of cases.
+The id schema used in this module is based on the recommendations from [CouchDB Best Practices](http://ehealthafrica.github.io/couchdb-best-practices/#one-to-n-relations).
 
 ## Usage
 The `smartId` service provides two functions
@@ -16,7 +16,7 @@ The `smartId` service provides two functions
 ### `parse`
 
 ```js
-smartId.parse('asimov:foundation:1', 'author:series:bookNr')
+smartId.parse('author:asimov:series:foundation:bookNr:1')
 ```
 
 will return
@@ -26,13 +26,33 @@ will return
 
 Note that all fields will be returned as Strings.
 
+An optional pattern can be provided for validation purposes (see [patterns](#Patterns)). If the id is missing any of the
+non optional fields specified in the pattern, an exception is thrown.
+
+```js
+smartId.parse('author:asimov:series:foundation:bookNr:1', 'author:series:bookNr:?publicationYear')
+```
+
+will return
+```js
+{ author: 'asimov', series: 'foundation', bookNr: '1' }
+```
+
+while
+```js
+smartId.parse('author:asimov:series:foundation:bookNr:1', 'author:series:bookNr:publicationYear')
+```
+
+will throw an exception
+
+
 ### `idify`
 
 ```js
 smartId.idify({ author: 'asimov', series: 'foundation', bookNr: 1 }, 'author:series:bookNr')
 ```
 
-will return `asimov:foundation:1`
+will return `author:asimov:series:foundation:bookNr:1`
 
 Fields containing `undefined`, `null` or `''` will be ignored. Example:
 
@@ -40,7 +60,7 @@ Fields containing `undefined`, `null` or `''` will be ignored. Example:
 smartId.idify({ author: 'asimov', series: 'foundation', bookNr: undefined }, 'author:series:?bookNr')
 ```
 
-will return `asimov:foundation`
+will return `author:asimov:series:foundation`
 
 ### Config
 
@@ -66,7 +86,7 @@ angular.module('myMod', [])
 Pass a preconfigured pattern id as an argument to `parse` or `idify`:
 
 ```js
-smartId.parse('asimov:foundation:1', 'bookSeries')
+smartId.parse('author:asimov:series:foundation:bookNr:1', 'bookSeries')
 ```
 
 ### Patterns
@@ -74,7 +94,7 @@ smartId.parse('asimov:foundation:1', 'bookSeries')
 Patterns allow optional fields, to specify an optional field add `?` before the field name:
 
 ```js
-smartId.parse('asimov:foundation:1:awesome', 'author:series:bookNr:?rating')
+smartId.parse('author:asimov:series:foundation:bookNr:1:rating:awesome', 'author:series:bookNr:?rating')
 ```
 
 will return
@@ -84,15 +104,13 @@ will return
 
 while
 ```js
-smartId.parse('asimov:foundation:1', 'author:series:bookNr:?rating')
+smartId.parse('author:asimov:series:foundation:bookNr:1', 'author:series:bookNr:?rating')
 ```
 
 will still return
 ```js
 { author: 'asimov', series: 'foundation', bookNr: '1' }
 ```
-
-It is ok to specify as many optional fields as you wish, but all optional fields should appear at the end, that is, after all the non optional ones (`author:book:?rating` is allowed but `author:?book:rating` will throw an exception).
 
 ## Installation
 

@@ -19,18 +19,6 @@ const parsePattern = (pattern, separator) => {
           .map(parsePatternField)
 }
 
-const validate = (parsedPatternFields) => {
-  let wasOptional = false
-
-  parsedPatternFields.forEach((field, index) => {
-    if (field.isOptional) {
-      wasOptional = true
-    } else if (wasOptional) {
-      throw new Error('invalid pattern: ' + parsedPatternFields[index - 1].key + ' is optional, but is followed by non optional field ' + field.key)
-    }
-  })
-}
-
 export default class SmartIdService {
   constructor ($injector) {
     try {
@@ -47,22 +35,28 @@ export default class SmartIdService {
   }
 
   parse (id, pattern) {
-    pattern = this.patterns[pattern] || pattern
     const idFields = id.split(this.separator)
-    const patternFields = parsePattern(pattern, this.separator)
-    validate(patternFields)
 
-    let result = idFields.reduce((parsed, value) => {
-      const key = patternFields.shift().key
-      parsed[key] = value
+    let key
+    let result = idFields.reduce((parsed, field) => {
+      if (!key) {
+        key = field
+      } else {
+        parsed[key] = field
+        key = undefined
+      }
       return parsed
     }, {})
 
-    if (patternFields.length) {
-      const next = patternFields[0]
-      if (!next.isOptional) {
-        throw new Error('could not parse the id, non optional field ' + next.key + ' missing')
-      }
+    if (pattern) {
+      pattern = this.patterns[pattern] || pattern
+      const patternFields = parsePattern(pattern, this.separator)
+
+      patternFields.forEach((field) => {
+        if (!result[field.key] && !field.isOptional) {
+          throw new Error('could not parse the id, non optional field ' + field.key + ' missing')
+        }
+      })
     }
 
     return result
@@ -73,30 +67,19 @@ export default class SmartIdService {
       return typeof value !== 'undefined' && value !== null && value !== ''
     }
 
-    Object.keys(object).forEach((key) => {
-      if (!isValid(object[key])) {
-        delete object[key]
-      }
-    })
-
     pattern = this.patterns[pattern] || pattern
     const patternFields = parsePattern(pattern, this.separator)
-    validate(patternFields)
 
-    const nbGivenFields = Object.keys(object).length
-    const nbMissingFields = patternFields.length - nbGivenFields
-    if (nbMissingFields > 0) {
-      const optionalFields = patternFields.splice(nbGivenFields)
-      optionalFields.forEach((field) => {
+    return patternFields.reduce((id, field) => {
+      const value = object[field.key]
+      if (value && isValid(value)) {
+        return id + (id.length ? this.separator + field.key : field.key) + this.separator + value
+      } else {
         if (!field.isOptional) {
           throw new Error('could not generate id, missing field ' + field.key)
         }
-      })
-    }
-
-    return patternFields.splice(0, nbGivenFields).reduce((id, field) => {
-      const value = object[field.key]
-      return id + (id.length ? this.separator + value : value)
+        return id
+      }
     }, '')
   }
 }
