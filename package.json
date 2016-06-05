@@ -2,7 +2,7 @@
   "name": "ng-smart-id",
   "version": "4.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "dist/bundle.js",
   "scripts": {
     "build": "rollup -c",
     "pretest": "standard",
