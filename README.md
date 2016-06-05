@@ -114,9 +114,13 @@ will still return
 
 ## Installation
 
-Install with bower:
+Install with `bower`:
 
-    bower install --save git@github.com:fielded/ng-smart-id.git
+    bower install --save fielded/ng-smart-id
+
+or `npm`:
+
+    npm install --save fielded/ng-smart-id
 
 Then simply add `ngSmartId` as a dependency somewhere in your project that makes sense and you're good to go.
 
