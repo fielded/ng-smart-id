@@ -17,5 +17,8 @@ export default {
       browser: true
     }),
     commonjs()
-  ]
+  ],
+  globals: {
+    angular: 'angular'
+  }
 }
