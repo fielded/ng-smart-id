@@ -1,6 +1,6 @@
 {
   "name": "ng-smart-id",
-  "version": "4.0.1",
+  "version": "4.0.3",
   "description": "",
   "main": "dist/bundle.js",
   "scripts": {
