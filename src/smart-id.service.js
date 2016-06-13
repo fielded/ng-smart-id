@@ -19,7 +19,7 @@ const parsePattern = (pattern, separator) => {
           .map(parsePatternField)
 }
 
-export default class SmartIdService {
+class SmartIdService {
   constructor ($injector) {
     try {
       this.separator = $injector.get('ngSmartIdSeparator')
@@ -83,3 +83,7 @@ export default class SmartIdService {
     }, '')
   }
 }
+
+SmartIdService.$inject = ['$injector']
+
+export default SmartIdService
